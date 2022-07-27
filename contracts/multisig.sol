@@ -3,7 +3,7 @@ pragma solidity ^0.8.4;
 
 /// @author 0xosas
 /// @notice A simple implementation of a multi signature wallet
-contract LilMultiSigWallet{
+contract MultiSigWallet{
 
     /// Events
     event Deposit(address indexed sender, uint amount);
