@@ -61,9 +61,8 @@ contract MultiSigWallet{
         _;
     }
 
-    modifier transactionExists(uint _transactionId) {
-        require(_transactionId < transactions.length, "transaction does not exists");
-        _;
+    function transactionExists(uint _transactionId) public view returns (bool){
+        return _transactionId < transactions.length;
     }
 
     modifier notExecuted(uint _transactionId) {
@@ -94,10 +93,9 @@ contract MultiSigWallet{
     function approve(uint _transactionId) 
         external 
         onlyOwner 
-        transactionExists(_transactionId) 
         notExecuted(_transactionId) 
     {
-
+        require(transactionExists(_transactionId), "transaction does not exists");
         approveBy[_transactionId][msg.sender] = true;
         emit ApproveTransaction(msg.sender, _transactionId);
     }
@@ -106,7 +104,8 @@ contract MultiSigWallet{
     /// @notice gives you the total number of approvals of
     /// a single transaction
     /// @param _transactionId is the ID of the transaction
-    function getApprovalCount(uint _transactionId) private view returns (uint count) {
+    /// made public for testing
+    function getApprovalCount(uint _transactionId) public view returns (uint count) {
         /// count overflow is impossible as it cannot exceed `owners.length`
         unchecked {
             for(uint i=0; i < owners.length; i++) {
@@ -121,9 +120,9 @@ contract MultiSigWallet{
     /// @param _transactionId is the ID of the transaction
     function execute(uint _transactionId) 
         external 
-        transactionExists(_transactionId) 
         notExecuted(_transactionId) 
     {
+        require(transactionExists(_transactionId), "transaction does not exists");
         require(getApprovalCount(_transactionId) >= minApproval, "not enough approvals");
 
         Transaction storage transaction = transactions[_transactionId];
@@ -140,9 +139,9 @@ contract MultiSigWallet{
     function refuse(uint _transactionId) 
         external 
         onlyOwner 
-        transactionExists(_transactionId) 
         notExecuted(_transactionId) 
     {
+        require(transactionExists(_transactionId), "transaction does not exists");
         require(approveBy[_transactionId][msg.sender], "transaction not approved");
 
         approveBy[_transactionId][msg.sender] = false;
